@@ -33,7 +33,14 @@ const account4 = {
   pin: 4444,
 };
 
-const accounts = [account1, account2, account3, account4];
+const account5 = {
+  owner: 'Ahmed Adawy',
+  movements: [600, -1000, 2000, 700, -100, 600, -50, 75],
+  interestRate: 1,
+  pin: 5555,
+};
+
+const accounts = [account1, account2, account3, account4, account5];
 
 // Elements
 const labelWelcome = document.querySelector('.welcome');
@@ -181,6 +188,30 @@ btnLogin.addEventListener('click', function (e) {
     inputLoginPin.blur()
 
   }
+  else {
+    let timerInterval;
+    Swal.fire({
+      title: "Wrong Username or Password!",
+      html: `Try Again in <b></b> seconds.`,
+      timer: 3000,
+      timerProgressBar: true,
+      didOpen: () => {
+        Swal.showLoading();
+        const timer = Swal.getPopup().querySelector("b");
+        timerInterval = setInterval(() => {
+          timer.textContent = `${Swal.getTimerLeft() / 1000}`;
+        }, 100);
+      },
+      willClose: () => {
+        clearInterval(timerInterval);
+      }
+    }).then((result) => {
+      /* Read more about handling dismissals below */
+      if (result.dismiss === Swal.DismissReason.timer) {
+        console.log("I was closed by the timer");
+      }
+    });
+  }
 })
 
 // Implementing Transfers
@@ -305,7 +336,7 @@ btnClose.addEventListener('click', function (e) {
 
 btnSort.addEventListener('click', function (e) {
   e.preventDefault();
-  console.log(displayMovements(movements, true));
+  console.log(displayMovements(currentAccount.movements, true));
 
 })
 

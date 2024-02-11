@@ -45,6 +45,7 @@ const labelSumInterest = document.querySelector('.summary__value--interest');
 const labelTimer = document.querySelector('.timer');
 
 const containerApp = document.querySelector('.app');
+const containerHideAPP = document.querySelector('.mainApp')
 const containerMovements = document.querySelector('.movements');
 
 const btnLogin = document.querySelector('.login__btn');
@@ -153,13 +154,16 @@ btnLogin.addEventListener('click', function (e) {
     inputLoginPin.style = "display: none"
     btnLogin.style = "display: none"
     btnLogout.style = "display: block"
+    containerHideAPP.classList.remove('mainApp')
 
+    //Implementing Logout
     btnLogout.addEventListener('click', function (e) {
       e.preventDefault()
       btnLogout.style = "display: none"
       btnLogin.style = "display: block"
       inputLoginUsername.style = "display: block"
       inputLoginPin.style = "display: block"
+      containerHideAPP.classList.add('mainApp')
       containerApp.style.opacity = 0;
     })
 

@@ -136,6 +136,10 @@ nav {
   transition: all 1s;
 }
 
+.mainApp {
+  display: none;
+}
+
 .balance {
   grid-column: 1 / span 2;
   display: flex;

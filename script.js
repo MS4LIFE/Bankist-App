@@ -48,6 +48,7 @@ const containerApp = document.querySelector('.app');
 const containerMovements = document.querySelector('.movements');
 
 const btnLogin = document.querySelector('.login__btn');
+const btnLogout = document.querySelector('.form__btn--logout');
 const btnTransfer = document.querySelector('.form__btn--transfer');
 const btnLoan = document.querySelector('.form__btn--loan');
 const btnClose = document.querySelector('.form__btn--close');
@@ -63,8 +64,13 @@ const inputClosePin = document.querySelector('.form__input--pin');
 
 
 
+//set sort to false by default
+const displayMovements = function (movements, sort = false) {
 
-const displayMovements = function (movements) {
+  //Implementing sort
+  //slice to create a copy of the array
+  const movs = sort ? movements.slice().sort((a, b) => a - b) : movements
+
 
   containerMovements.innerHTML = '';
   movements.forEach(function (mov, i) {
@@ -137,14 +143,30 @@ let currentAccount = accounts.find(acc => acc.username === inputLoginUsername.va
 
 btnLogin.addEventListener('click', function (e) {
   e.preventDefault()
+
   currentAccount = accounts.find(acc => acc.username === inputLoginUsername.value);
   // console.log(currentAccount);
 
   if (currentAccount?.pin === Number(inputLoginPin.value)) {
 
+    inputLoginUsername.style = "display: none"
+    inputLoginPin.style = "display: none"
+    btnLogin.style = "display: none"
+    btnLogout.style = "display: block"
+
+    btnLogout.addEventListener('click', function (e) {
+      e.preventDefault()
+      btnLogout.style = "display: none"
+      btnLogin.style = "display: block"
+      inputLoginUsername.style = "display: block"
+      inputLoginPin.style = "display: block"
+      containerApp.style.opacity = 0;
+    })
+
     // Display UI and message
     labelWelcome.textContent = `Welcome back, ${currentAccount.owner.split('-')}`
     containerApp.style.opacity = 100
+
 
     // Display UI
     updateUI(currentAccount)
@@ -277,7 +299,11 @@ btnClose.addEventListener('click', function (e) {
   }
 })
 
+btnSort.addEventListener('click', function (e) {
+  e.preventDefault();
+  console.log(displayMovements(movements, true));
 
+})
 
 
 /////////////////////////////////////////////////
@@ -374,7 +400,7 @@ for (const account of accounts) {
   account.owner === 'Jessica Davis' && console.log(account);
 }
 
-// some method
+// SOME method
 
 //condition
 console.log(movements.some(mov => mov === -130));
@@ -384,3 +410,61 @@ console.log(movements.includes(-130));
 
 const anyDeposit = movements.some(mov => mov > 0)
 console.log(anyDeposit);
+
+
+
+
+//separate callback functions
+const deposit = mov => mov > 0
+const withdraw = mov => mov < 0
+
+// EVERY method
+console.log(movements.every(deposit)); //false
+console.log(account4.movements.every(deposit)); //true
+console.log(account4.movements.every(withdraw)); //false
+
+//  flat and flatmap methods
+const arr = [[1, 2, 3], [4, 5, 6], 7, 8];
+// flat method will flatten the arrays into a single array
+console.log(arr.flat());
+
+const arrDeep = [[[1, 2], 3], [4, [5, 6]], 7, 8];
+console.log(arrDeep);
+console.log(arrDeep.flat(2));
+
+// const accountMovements = accounts.map(acc => acc.movements);
+// const allMovements = accountMovements.flat();
+// console.log(allMovements);
+// const overAllMovements = allMovements.reduce((accum, mov) => accum + mov, 0)
+// console.log(overAllMovements);
+
+const chainedOverAllMovements = accounts.map(acc => acc.movements).flat().reduce((accum, mov) => accum + mov, 0)
+console.log(chainedOverAllMovements);
+
+// flatMap method
+const flatMapOverAllMovements = accounts.flatMap(acc => acc.movements).reduce((accum, mov) => accum + mov, 0)
+console.log(flatMapOverAllMovements);
+
+
+// sort method with strings
+const owners = ['Jonas', 'Zach', 'Adam', 'Martha']
+console.log(owners);
+//ascending
+console.log(owners.sort());
+
+// sort method with numbers
+console.log(movements);
+console.log(movements.sort()); //wrong numbers order
+
+// ascending order
+movements.sort((a, b) => {
+  // return < 0 => A, B (Keep order)
+  // return > 0 => B, A (Switch order)
+  if (a > b) return 1
+  if (b > a) return -1
+})
+console.log(movements);
+
+// arrow syntax for ascending
+movements.sort((a, b) => a - b)
+console.log(movements);

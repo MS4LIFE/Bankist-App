@@ -163,6 +163,7 @@ btnLogin.addEventListener('click', function (e) {
     btnLogout.style = "display: block"
     containerHideAPP.classList.remove('mainApp')
 
+
     //Implementing Logout
     btnLogout.addEventListener('click', function (e) {
       e.preventDefault()
@@ -172,12 +173,13 @@ btnLogin.addEventListener('click', function (e) {
       inputLoginPin.style = "display: block"
       containerHideAPP.classList.add('mainApp')
       containerApp.style.opacity = 0;
+      labelWelcome.textContent = 'Log in to get started'
     })
 
     // Display UI and message
     labelWelcome.textContent = `Welcome back, ${currentAccount.owner.split('-')}`
     containerApp.style.opacity = 100
-
+    // containerApp.style = "transition: 0.3s ease-in"
 
     // Display UI
     updateUI(currentAccount)

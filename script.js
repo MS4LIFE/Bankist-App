@@ -152,7 +152,7 @@ let currentAccount = accounts.find(acc => acc.username === inputLoginUsername.va
 btnLogin.addEventListener('click', function (e) {
   e.preventDefault()
 
-  currentAccount = accounts.find(acc => acc.username === inputLoginUsername.value);
+  currentAccount = accounts.find(acc => (acc.username === inputLoginUsername.value));
   // console.log(currentAccount);
 
   if (currentAccount?.pin === Number(inputLoginPin.value)) {
@@ -164,17 +164,7 @@ btnLogin.addEventListener('click', function (e) {
     containerHideAPP.classList.remove('mainApp')
 
 
-    //Implementing Logout
-    btnLogout.addEventListener('click', function (e) {
-      e.preventDefault()
-      btnLogout.style = "display: none"
-      btnLogin.style = "display: block"
-      inputLoginUsername.style = "display: block"
-      inputLoginPin.style = "display: block"
-      containerHideAPP.classList.add('mainApp')
-      containerApp.style.opacity = 0;
-      labelWelcome.textContent = 'Log in to get started'
-    })
+
 
     // Display UI and message
     labelWelcome.textContent = `Welcome back, ${currentAccount.owner.split('-')}`
@@ -215,6 +205,30 @@ btnLogin.addEventListener('click', function (e) {
     });
   }
 })
+
+//Implementing Logout
+// const logOut = function (e) {
+//   e.preventDefault()
+//   btnLogout.style.display = "none"
+//   btnLogin.style.display = "block"
+//   inputLoginUsername.style.display = "block"
+//   inputLoginPin.style.display = " block"
+//   containerHideAPP.classList.add('mainApp')
+//   containerApp.style.opacity = 0;
+//   labelWelcome.textContent = 'Log in to get started'
+
+// }
+const logOut = function (e) {
+  e.preventDefault()
+  btnLogout.style.display = "none";
+  btnLogin.style.display = "block";
+  inputLoginUsername.style.display = "block";
+  inputLoginPin.style.display = "block";
+  containerHideAPP.classList.add('mainApp');
+  containerApp.style.opacity = 0;
+  labelWelcome.textContent = 'Log in to get started';
+};
+btnLogout.addEventListener('click', logOut)
 
 // Implementing Transfers
 btnTransfer.addEventListener('click', function (e) {
@@ -324,6 +338,27 @@ btnClose.addEventListener('click', function (e) {
           text: "Your account has been deleted.",
           icon: "success"
         });
+
+
+        let timerInterval;
+        Swal.fire({
+          title: '',
+          html: "Logging out in <b></b> seconds.",
+          timer: 2000,
+          timerProgressBar: true,
+          didOpen: () => {
+            Swal.showLoading();
+            const timer = Swal.getPopup().querySelector("b");
+            timerInterval = setInterval(() => {
+              timer.textContent = `${Swal.getTimerLeft() / 1000}`;
+            }, 100);
+          },
+          willClose: () => {
+            clearInterval(timerInterval);
+            logOut(e);
+          }
+        });
+        updateUI()
       }
     });
 

@@ -76,12 +76,14 @@ const inputClosePin = document.querySelector('.form__input--pin');
 const displayMovements = function (movements, sort = false) {
 
   //Implementing sort
-  //slice to create a copy of the array
-  const movs = sort ? movements.slice().sort((a, b) => a - b) : movements
-
-
   containerMovements.innerHTML = '';
-  movements.forEach(function (mov, i) {
+
+
+  //slice to create a copy of the array
+  const movs = sort ? movements?.slice().sort((a, b) => a - b) : movements;
+
+
+  movs.forEach(function (mov, i) {
 
     const type = mov > 0 ? 'deposit' : 'withdrawal'
 
@@ -371,12 +373,16 @@ btnClose.addEventListener('click', function (e) {
   }
 })
 
+// Initialize the sortedState variable to keep track of the current sorting state
+let sortedState = false;
+
 btnSort.addEventListener('click', function (e) {
   e.preventDefault();
-  console.log(displayMovements(currentAccount.movements, true));
-
+  // Call the displayMovements function to display the account movements with the updated sorting state
+  displayMovements(currentAccount.movements, !sortedState);
+  // Toggle the sorting state for the next click
+  sortedState = !sortedState;
 })
-
 
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////

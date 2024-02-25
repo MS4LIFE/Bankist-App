@@ -10,6 +10,18 @@ const account1 = {
   movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
   interestRate: 1.2, // %
   pin: 1111,
+  movementsDates: [
+    '2024-02-01T21:31:17.178Z',
+    '2024-02-10T07:42:02.383Z',
+    '2024-02-13T09:15:04.904Z',
+    '2024-02-15T10:17:24.185Z',
+    '2024-02-20T14:11:59.604Z',
+    '2024-02-22T17:01:17.194Z',
+    '2024-02-23T23:36:17.929Z',
+    '2024-02-24T10:51:36.790Z',
+  ],
+  currency: 'EUR',
+  locale: 'pt-PT', // de-DE
 };
 
 const account2 = {
@@ -17,6 +29,18 @@ const account2 = {
   movements: [5000, 3400, -150, -790, -3210, -1000, 8500, -30],
   interestRate: 1.5,
   pin: 2222,
+  movementsDates: [
+    '2024-02-01T21:15:33.035Z',
+    '2024-02-09T07:48:16.867Z',
+    '2024-02-12T09:04:23.907Z',
+    '2024-02-14T10:18:46.235Z',
+    '2024-02-16T14:33:06.386Z',
+    '2024-02-21T17:43:26.374Z',
+    '2024-02-23T23:49:59.371Z',
+    '2024-02-24T10:01:20.894Z',
+  ],
+  currency: 'USD',
+  locale: 'en-US',
 };
 
 const account3 = {
@@ -40,7 +64,7 @@ const account5 = {
   pin: 5555,
 };
 
-const accounts = [account1, account2, account3, account4, account5];
+const accounts = [account1, account2];
 
 // Elements
 const labelWelcome = document.querySelector('.welcome');
@@ -70,30 +94,54 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
+// Implement movements date by day 
+const formatMovementsDate = function (date) {
 
+  const calcDaysPassed = (date1, date2) => Math.round(Math.abs(date2 - date1)
+    /
+    (1000 * 60 * 60 * 24));
 
+  const daysPassed = calcDaysPassed(new Date(), date);
+  console.log(daysPassed);
+
+  if (daysPassed === 0) return 'Today';
+  if (daysPassed === 1) return 'Yesterday';
+  if (daysPassed <= 7) return `${daysPassed} days ago`;
+  else {
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    return `${day > 9 ? day : `0${day}`}/${month > 9 ? month : `0${month}`}/${year}`
+  }
+
+}
 //set sort to false by default
-const displayMovements = function (movements, sort = false) {
+const displayMovements = function (acc, sort = false) {
 
   //Implementing sort
   containerMovements.innerHTML = '';
 
 
   //slice to create a copy of the array
-  const movs = sort ? movements?.slice().sort((a, b) => a - b) : movements;
+  const movs = sort ? acc.movements?.slice().sort((a, b) => a - b)
+    : acc.movements;
 
 
   movs.forEach(function (mov, i) {
 
     const type = mov > 0 ? 'deposit' : 'withdrawal'
 
+    const date = new Date(acc.movementsDates[i])
+    const displayDate = formatMovementsDate(date)
+
     const html = `
     <div class="movements__row">
           <div class="movements__type movements__type--${type}">
             ${i + 1} ${type}
           </div>
+          <div class="movements__date">${displayDate}</div>
           <div class="movements__value">
-            ${mov}€
+            ${mov.toFixed(2)}€
           </div>
     </div>
     `
@@ -105,16 +153,16 @@ const displayMovements = function (movements, sort = false) {
 const calcDisplayBalance = function (acc) {
 
   acc.balance = acc.movements.reduce((acc, mov) => acc + mov, 0)
-  labelBalance.textContent = `${acc.balance} EUR`
+  labelBalance.textContent = `${acc.balance.toFixed(2)} EUR`
 }
 
 // chaining
 const calcDisplaySummary = function (acc) {
   const incomes = movements.filter(mov => mov > 0).reduce((accum, mov) => accum + mov, 0)
-  labelSumIn.textContent = `${incomes} €`
+  labelSumIn.textContent = `${incomes.toFixed(2)} €`
 
   const out = movements.filter(mov => mov < 0).reduce((accum, mov) => accum + mov, 0)
-  labelSumOut.textContent = `${Math.abs(out)} €`
+  labelSumOut.textContent = `${Math.abs(out).toFixed(2)} €`
 
 
   const interest = movements.filter(mov => mov > 0)
@@ -126,7 +174,7 @@ const calcDisplaySummary = function (acc) {
     })
     .reduce((accum, interest) => accum + interest, 0)
 
-  labelSumInterest.textContent = `${interest.toFixed(1)} €`
+  labelSumInterest.textContent = `${interest.toFixed(2)} €`
 }
 
 /*forEach method */
@@ -140,7 +188,7 @@ createUserNames(accounts);
 
 const updateUI = function (acc) {
   // Display Movements
-  displayMovements(acc.movements)
+  displayMovements(acc)
   // Display Balance
   calcDisplayBalance(acc)
   // Display Summary
@@ -149,6 +197,18 @@ const updateUI = function (acc) {
 
 // Event Login handler UI
 let currentAccount = accounts.find(acc => acc.username === inputLoginUsername.value);
+
+// DATE
+const now = new Date();
+
+const day = now.getDate();
+const month = now.getMonth() + 1;
+const year = now.getFullYear();
+const hour = now.getHours();
+const min = now.getMinutes();
+labelDate.textContent = now
+// day/month/year
+labelDate.textContent = `${day > 9 ? day : `0${day}`}/${month > 9 ? month : `0${month}`}/${year}, ${hour > 9 ? hour : `0${hour}`}:${min > 9 ? min : `0${min}`}`
 
 
 btnLogin.addEventListener('click', function (e) {
@@ -252,6 +312,10 @@ btnTransfer.addEventListener('click', function (e) {
     currentAccount.movements.push(-amount)
     receiverAcc.movements.push(amount)
 
+    // Add transfer date to movements dates array
+    currentAccount.movementsDates.push(new Date().toISOString());
+    receiverAcc.movementsDates.push(new Date().toISOString());
+
     // Update UI
     updateUI(currentAccount)
   }
@@ -273,7 +337,7 @@ inputLoanAmount.addEventListener('click', function () {
 
 btnLoan.addEventListener('click', function (e) {
   e.preventDefault();
-  const amount = Number(inputLoanAmount.value);
+  const amount = Math.floor(inputLoanAmount.value);
   if (amount > 0 && currentAccount.movements.some(mov => mov >= amount * 0.1)) {
 
     Swal.fire({
@@ -289,6 +353,9 @@ btnLoan.addEventListener('click', function (e) {
         // Add movement
         Swal.fire("Loan Approved!", "", "success");
         currentAccount.movements.push(amount);
+
+        // Add loan date to movementsDates using toISOString method
+        currentAccount.movementsDates.push(new Date().toISOString());
 
         // Update UI
         updateUI(currentAccount)
@@ -379,6 +446,7 @@ let sortedState = false;
 btnSort.addEventListener('click', function (e) {
   e.preventDefault();
   // Call the displayMovements function to display the account movements with the updated sorting state
+  console.log(currentAccount.movements);
   displayMovements(currentAccount.movements, !sortedState);
   // Toggle the sorting state for the next click
   sortedState = !sortedState;
@@ -468,11 +536,11 @@ const totalDepositsUSD2 = movements.filter(mov => mov > 0)
 
 // find method
 const firstWithdrawal = movements.find(mov => mov < 0)
-console.log(firstWithdrawal);
-console.log(accounts);
+// console.log(firstWithdrawal);
+// console.log(accounts);
 
 const jesAcc = accounts.find(acc => acc.owner === 'Jessica Davis')
-console.log(jesAcc);
+// console.log(jesAcc);
 
 for (const account of accounts) {
   account.owner === 'Jessica Davis' && console.log(account);
@@ -480,14 +548,14 @@ for (const account of accounts) {
 
 // SOME method
 
-//condition
-console.log(movements.some(mov => mov === -130));
+// condition
+// console.log(movements.some(mov => mov === -130));
 
 //equality
-console.log(movements.includes(-130));
+// console.log(movements.includes(-130));
 
 const anyDeposit = movements.some(mov => mov > 0)
-console.log(anyDeposit);
+// console.log(anyDeposit);
 
 
 
@@ -497,18 +565,18 @@ const deposit = mov => mov > 0
 const withdraw = mov => mov < 0
 
 // EVERY method
-console.log(movements.every(deposit)); //false
-console.log(account4.movements.every(deposit)); //true
-console.log(account4.movements.every(withdraw)); //false
+// console.log(movements.every(deposit)); //false
+// console.log(account4.movements.every(deposit)); //true
+// console.log(account4.movements.every(withdraw)); //false
 
 //  flat and flatmap methods
 const arr = [[1, 2, 3], [4, 5, 6], 7, 8];
 // flat method will flatten the arrays into a single array
-console.log(arr.flat());
+// console.log(arr.flat());
 
 const arrDeep = [[[1, 2], 3], [4, [5, 6]], 7, 8];
-console.log(arrDeep);
-console.log(arrDeep.flat(2));
+// console.log(arrDeep);
+// console.log(arrDeep.flat(2));
 
 // const accountMovements = accounts.map(acc => acc.movements);
 // const allMovements = accountMovements.flat();
@@ -517,22 +585,22 @@ console.log(arrDeep.flat(2));
 // console.log(overAllMovements);
 
 const chainedOverAllMovements = accounts.map(acc => acc.movements).flat().reduce((accum, mov) => accum + mov, 0)
-console.log(chainedOverAllMovements);
+// console.log(chainedOverAllMovements);
 
 // flatMap method
 const flatMapOverAllMovements = accounts.flatMap(acc => acc.movements).reduce((accum, mov) => accum + mov, 0)
-console.log(flatMapOverAllMovements);
+// console.log(flatMapOverAllMovements);
 
 
 // sort method with strings
 const owners = ['Jonas', 'Zach', 'Adam', 'Martha']
-console.log(owners);
+// console.log(owners);
 //ascending
-console.log(owners.sort());
+// console.log(owners.sort());
 
 // sort method with numbers
-console.log(movements);
-console.log(movements.sort()); //wrong numbers order
+// console.log(movements);
+// console.log(movements.sort()); //wrong numbers order
 
 // ascending order
 movements.sort((a, b) => {
@@ -541,8 +609,183 @@ movements.sort((a, b) => {
   if (a > b) return 1
   if (b > a) return -1
 })
-console.log(movements);
+// console.log(movements);
 
 // arrow syntax for ascending
 movements.sort((a, b) => a - b)
-console.log(movements);
+// console.log(movements);
+
+
+// Array methods practice
+// 1
+const bankDepositSum =
+  //   accounts.map(mov => mov.movements)
+  //   .flat()
+  //   .reduce((acc, mov) => (mov > 0 ? acc + mov : acc), 0)
+  // console.log(bankDepositSum);
+
+  accounts.flatMap(mov => mov.movements)
+    .filter(mov => mov > 0).reduce((accum, mov) => accum + mov, 0)
+// console.log(bankDepositSum);
+
+// 2
+const numDeposits1000 =
+  //   accounts
+  //   .flatMap(mov => mov.movements)
+  //   // number of deposits greater than 1000
+  //   .filter(mov => mov >= 1000).length
+  // console.log(numDeposits1000);
+
+  accounts
+    .flatMap(mov => mov.movements).reduce((count, cur) => {
+      count += cur >= 1000
+    })
+
+
+
+
+// Dates Section Lectures
+//checking if value is number
+// console.log(Number.isFinite(20));
+// console.log(Number.isFinite('20'));
+// console.log(Number.isFinite(+'20X'));
+
+// checking if value is integer
+// console.log(Number.isInteger(20.5));
+// console.log(Number.isInteger(20));
+
+// Math Section
+// console.log(Math.sqrt(25));
+// console.log(25 ** (1 / 2));
+// console.log(8 ** (1 / 3));
+
+// console.log(Math.max(5, 18, 23, 11, 2));
+// console.log(Math.min(5, 18, 23, 11, 2));
+
+// console.log(Math.PI);
+// console.log(Math.PI * Number.parseFloat('10px') ** 2);
+
+
+// random numbers
+// console.log(Math.floor(Math.random() * 6) + 1);
+
+const randomInt = (min, max) => Math.floor(Math.random() * (max - min) + 1) + min;
+// console.log(randomInt(10, 20));
+// console.log(randomInt(10, 20));
+
+// rounding integers
+// console.log(Math.round(23.3));
+// console.log(Math.round(23.9));
+
+// rounding decimals
+// console.log(Math.ceil(23.3));
+// console.log(Math.ceil(23.9));
+
+// floor
+// console.log(Math.floor(23.3));
+// console.log(Math.floor('23.9'));
+
+//rounding decimals
+// console.log(+(2.7).toFixed(0));
+// console.log(+(2.7).toFixed(3));
+// console.log(+(2.345).toFixed(2));
+
+// remainder operator
+// console.log(5 % 2);
+// console.log(5 / 2);
+
+const isEven = n => n % 2 === 0;
+// console.log(isEven(8));
+// console.log(isEven(23));
+// console.log(isEven(514));
+
+
+// Implementing Toggling styles
+labelBalance.addEventListener('click', function () {
+  [...document.querySelectorAll('.movements__row')].forEach(function (row, i) {
+    //change the color for every 2nd row
+    // 0, 2, 4, 6, 8
+    if (i % 2 === 0) row.style.backgroundColor = 'orangered';
+
+    //change the color for every 3rd row
+    // 1, 3, 5, 7, 9
+    if (i % 3 === 0) row.style.backgroundColor = 'lightblue';
+  })
+})
+
+//Numeric separators
+const diameter = 287_460_000_000;
+// console.log(diameter);
+
+const price = 345_99;
+// console.log(price);
+
+const transferFee1 = 15_00;
+const transferFee2 = 1_500;
+// console.log(transferFee1, transferFee2);
+
+const PI = 3.1415;
+// console.log(PI);
+
+// console.log(Number('230000'));   // 230000
+// console.log(Number('230_000'));  // NaN
+// console.log(Number.parseInt('230_000'));  // 230
+
+
+// bigInt
+// console.log(Number.MAX_SAFE_INTEGER);
+// console.log(Number(BigInt('23000000000000000000000000000')));
+// console.log(BigInt(2234567898765432345678923456782345678n));
+//n for bigint
+// console.log(typeof (20n));
+// console.log(20n > 15);
+// console.log(20n === 20);
+
+// division
+// console.log(5n / 2n);
+// console.log(5 / 2);
+
+
+
+
+// Working with dates
+
+// const now = new Date();
+// console.log(now);
+// console.log(new Date('Aug 02 2020 18:05:41'));
+// console.log(new Date('December 24, 2015'));
+// console.log(new Date(account1.movementsDates[0]));
+
+// console.log(new Date(2037, 10, 19, 15, 23, 5));
+// console.log(new Date(0));
+// // convert from days to milliseconds
+// console.log(new Date(3 * 24 * 60 * 60 * 1000));
+
+// const future = new Date(2037, 10, 19, 15, 23);
+// console.log(future);
+// console.log(future.getFullYear());
+// console.log(future.getMonth());
+// console.log(future.getDate());
+// console.log(future.getDay());
+// console.log(future.getHours());
+// console.log(future.getMinutes());
+// console.log(future.getSeconds());
+// console.log(future.toISOString());
+// console.log(future.getTime());
+// console.log(new Date(2142253380000));
+
+// console.log(Date.now());
+
+// future.setFullYear(2040); // same with months and days
+// console.log(future);
+
+// const future = new Date(2037, 10, 19, 15, 23);
+// console.log(future);
+// //it will convert date to number in milliseconds
+// console.log(-future);
+// console.log(+future);
+// console.log(Number(future));
+
+// const calcDaysPassed = (date1, date2) => Math.abs(date2 - date1) / (1000 * 60 * 60 * 24);
+// const days1 = calcDaysPassed(new Date(2037, 3, 14), new Date(2037, 3, 4))
+// console.log(days1);

@@ -398,7 +398,7 @@ btnLogin.addEventListener('click', function (e) {
 
 // }
 const logOut = function (e) {
-  clearInterval(timer);
+
   e.preventDefault()
   btnLogout.style.display = "none";
   btnLogin.style.display = "block";
@@ -547,10 +547,18 @@ btnClose.addEventListener('click', function (e) {
           willClose: () => {
             clearInterval(timerInterval);
             logOut(e);
+            Swal.close();
+            btnLogout.style.display = "none";
+            btnLogin.style.display = "block";
+            inputLoginUsername.style.display = "block";
+            inputLoginPin.style.display = "block";
+            containerHideAPP.classList.add('mainApp');
+            containerApp.style.opacity = 0;
+            labelWelcome.textContent = 'Log in to get started';
           }
         });
-        updateUI()
       }
+      updateUI()
     });
 
 

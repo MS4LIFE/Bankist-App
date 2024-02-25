@@ -14,11 +14,11 @@ const account1 = {
     '2024-02-01T21:31:17.178Z',
     '2024-02-10T07:42:02.383Z',
     '2024-02-13T09:15:04.904Z',
-    '2024-02-15T10:17:24.185Z',
-    '2024-02-20T14:11:59.604Z',
-    '2024-02-22T17:01:17.194Z',
-    '2024-02-23T23:36:17.929Z',
-    '2024-02-24T10:51:36.790Z',
+    '2024-02-20T10:17:24.185Z',
+    '2024-02-22T14:11:59.604Z',
+    '2024-02-23T17:01:17.194Z',
+    '2024-02-24T23:36:17.929Z',
+    '2024-02-25T10:51:36.790Z',
   ],
   currency: 'EUR',
   locale: 'pt-PT', // de-DE
@@ -48,6 +48,18 @@ const account3 = {
   movements: [200, -200, 340, -300, -20, 50, 400, -460],
   interestRate: 0.7,
   pin: 3333,
+  movementsDates: [
+    "2024-03-05T14:22:09.123Z",
+    "2024-03-11T08:37:54.456Z",
+    "2024-03-15T16:59:32.789Z",
+    "2024-03-19T12:45:20.567Z",
+    "2024-03-24T19:30:48.901Z",
+    "2024-03-28T23:10:11.234Z",
+    "2024-04-02T05:55:33.543Z",
+    "2024-04-06T09:26:44.876Z"
+  ],
+  currency: "USD",
+  locale: "en-US"
 };
 
 const account4 = {
@@ -55,6 +67,18 @@ const account4 = {
   movements: [430, 1000, 700, 50, 90],
   interestRate: 1,
   pin: 4444,
+  movementsDates: [
+    "2024-03-01T18:08:37.456Z",
+    "2024-03-07T10:41:45.789Z",
+    "2024-03-10T14:57:29.234Z",
+    "2024-03-13T20:12:53.567Z",
+    "2024-03-18T04:29:16.901Z",
+    "2024-03-22T11:04:08.234Z",
+    "2024-03-26T15:33:51.543Z",
+    "2024-03-30T21:19:02.876Z"
+  ],
+  currency: "USD",
+  locale: "en-US"
 };
 
 const account5 = {
@@ -62,9 +86,21 @@ const account5 = {
   movements: [600, -1000, 2000, 700, -100, 600, -50, 75],
   interestRate: 1,
   pin: 5555,
+  movementsDates: [
+    "2024-02-28T22:45:10.567Z",
+    "2024-03-06T12:30:22.901Z",
+    "2024-03-09T17:15:37.234Z",
+    "2024-03-12T21:40:48.543Z",
+    "2024-03-17T03:05:59.876Z",
+    "2024-03-21T06:44:34.456Z",
+    "2024-03-25T10:59:12.789Z",
+    "2024-03-29T14:23:51.123Z"
+  ],
+  currency: "USD",
+  locale: "en-US"
 };
 
-const accounts = [account1, account2];
+const accounts = [account1, account2, account3, account4, account5];
 
 // Elements
 const labelWelcome = document.querySelector('.welcome');
@@ -95,7 +131,7 @@ const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
 // Implement movements date by day 
-const formatMovementsDate = function (date) {
+const formatMovementsDate = function (date, locale) {
 
   const calcDaysPassed = (date1, date2) => Math.round(Math.abs(date2 - date1)
     /
@@ -108,13 +144,26 @@ const formatMovementsDate = function (date) {
   if (daysPassed === 1) return 'Yesterday';
   if (daysPassed <= 7) return `${daysPassed} days ago`;
   else {
-    const day = date.getDate();
-    const month = date.getMonth() + 1;
-    const year = date.getFullYear();
-    return `${day > 9 ? day : `0${day}`}/${month > 9 ? month : `0${month}`}/${year}`
-  }
 
+    //Create date manually
+    // const day = date.getDate();
+    // const month = date.getMonth() + 1;
+    // const year = date.getFullYear();
+    // return `${day > 9 ? day : `0${day}`}/${month > 9 ? month : `0${month}`}/${year}`
+
+    //using Intl.DateTimeFormat
+    return Intl.DateTimeFormat(locale).format(date)
+  }
 }
+
+//formatted currencies using a reusable function
+const formatCurrency = function (value, locale, currency) {
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: currency
+  }).format(value)
+}
+
 //set sort to false by default
 const displayMovements = function (acc, sort = false) {
 
@@ -132,7 +181,10 @@ const displayMovements = function (acc, sort = false) {
     const type = mov > 0 ? 'deposit' : 'withdrawal'
 
     const date = new Date(acc.movementsDates[i])
-    const displayDate = formatMovementsDate(date)
+    const displayDate = formatMovementsDate(date, acc.locale)
+
+    //formatted currencies
+    const formattedMov = formatCurrency(mov, acc.locale, acc.currency)
 
     const html = `
     <div class="movements__row">
@@ -141,7 +193,7 @@ const displayMovements = function (acc, sort = false) {
           </div>
           <div class="movements__date">${displayDate}</div>
           <div class="movements__value">
-            ${mov.toFixed(2)}€
+            ${formattedMov}
           </div>
     </div>
     `
@@ -153,16 +205,16 @@ const displayMovements = function (acc, sort = false) {
 const calcDisplayBalance = function (acc) {
 
   acc.balance = acc.movements.reduce((acc, mov) => acc + mov, 0)
-  labelBalance.textContent = `${acc.balance.toFixed(2)} EUR`
+  labelBalance.textContent = formatCurrency(acc.balance, acc.locale, acc.currency)
 }
 
 // chaining
 const calcDisplaySummary = function (acc) {
   const incomes = movements.filter(mov => mov > 0).reduce((accum, mov) => accum + mov, 0)
-  labelSumIn.textContent = `${incomes.toFixed(2)} €`
+  labelSumIn.textContent = formatCurrency(incomes, acc.locale, acc.currency)
 
   const out = movements.filter(mov => mov < 0).reduce((accum, mov) => accum + mov, 0)
-  labelSumOut.textContent = `${Math.abs(out).toFixed(2)} €`
+  labelSumOut.textContent = formatCurrency(Math.abs(out), acc.locale, acc.currency)
 
 
   const interest = movements.filter(mov => mov > 0)
@@ -174,7 +226,7 @@ const calcDisplaySummary = function (acc) {
     })
     .reduce((accum, interest) => accum + interest, 0)
 
-  labelSumInterest.textContent = `${interest.toFixed(2)} €`
+  labelSumInterest.textContent = formatCurrency(interest, acc.locale, acc.currency)
 }
 
 /*forEach method */
@@ -195,25 +247,90 @@ const updateUI = function (acc) {
   calcDisplaySummary(acc)
 }
 
+// timer function
+const startLogOutTimer = function () {
+  // set time to 5 minutes
+  let time = 300;
+  console.log(time);
+  // Call the timer every second
+  const timer = setInterval(() => {
+    const min = String(Math.trunc(time / 60)).padStart(2, 0);
+    const sec = String(time % 60);
+    // In each call print the remaining time
+    labelTimer.textContent = `${min}:${sec > 9 ? sec : '0' + sec}`
+
+    // Decrease 1s
+    time--;
+
+    // when 0 seconds, stop timer and log out user
+    if (time === 0) {
+      clearInterval(timer);
+      btnLogout.style.display = "none";
+      btnLogin.style.display = "block";
+      inputLoginUsername.style.display = "block";
+      inputLoginPin.style.display = "block";
+      containerHideAPP.classList.add('mainApp');
+      containerApp.style.opacity = 0;
+      labelWelcome.textContent = 'Log in to get started';
+      Swal.fire({
+        title: "<strong>Session Expired !</strong>",
+        icon: "info",
+        showClass: {
+          popup: `
+      animate__animated
+      animate__fadeInUp
+      animate__faster
+    `
+        },
+        hideClass: {
+          popup: `
+      animate__animated
+      animate__fadeOutDown
+      animate__faster
+    `
+        }
+      });
+    }
+
+  }, 1000)
+}
+
+
 // Event Login handler UI
 let currentAccount = accounts.find(acc => acc.username === inputLoginUsername.value);
 
-// DATE
+// Internalization Date API
 const now = new Date();
+const options = {
+  hour: 'numeric',
+  minute: 'numeric',
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  weekday: 'long'
+}
+const locale = navigator.language;
+// console.log(locale);
+labelDate.textContent = new Intl.DateTimeFormat(locale, options).format(now)
 
-const day = now.getDate();
-const month = now.getMonth() + 1;
-const year = now.getFullYear();
-const hour = now.getHours();
-const min = now.getMinutes();
-labelDate.textContent = now
+
+//Create CURRENT DATE and TIME Manually
+
+// const now = new Date();
+// const day = now.getDate();
+// const month = now.getMonth() + 1;
+// const year = now.getFullYear();
+// const hour = now.getHours();
+// const min = now.getMinutes();
+// labelDate.textContent = now
 // day/month/year
-labelDate.textContent = `${day > 9 ? day : `0${day}`}/${month > 9 ? month : `0${month}`}/${year}, ${hour > 9 ? hour : `0${hour}`}:${min > 9 ? min : `0${min}`}`
+// labelDate.textContent = `${day > 9 ? day : `0${day}`}/${month > 9 ? month : `0${month}`}/${year}, ${hour > 9 ? hour : `0${hour}`}:${min > 9 ? min : `0${min}`}`
+
+
 
 
 btnLogin.addEventListener('click', function (e) {
   e.preventDefault()
-
   currentAccount = accounts.find(acc => (acc.username === inputLoginUsername.value));
   // console.log(currentAccount);
 
@@ -226,12 +343,12 @@ btnLogin.addEventListener('click', function (e) {
     containerHideAPP.classList.remove('mainApp')
 
 
-
-
     // Display UI and message
     labelWelcome.textContent = `Welcome back, ${currentAccount.owner.split('-')}`
     containerApp.style.opacity = 100
-    // containerApp.style = "transition: 0.3s ease-in"
+
+    //start timer
+    startLogOutTimer()
 
     // Display UI
     updateUI(currentAccount)
@@ -281,6 +398,7 @@ btnLogin.addEventListener('click', function (e) {
 
 // }
 const logOut = function (e) {
+  clearInterval(timer);
   e.preventDefault()
   btnLogout.style.display = "none";
   btnLogin.style.display = "block";
@@ -350,15 +468,19 @@ btnLoan.addEventListener('click', function (e) {
       /* Read more about isConfirmed, isDenied below */
       if (result.isConfirmed) {
 
-        // Add movement
-        Swal.fire("Loan Approved!", "", "success");
-        currentAccount.movements.push(amount);
+        //operation approved after 3 seconds
+        setTimeout(() => {
+          // Add movement
+          Swal.fire("Loan Approved!", "", "success");
+          currentAccount.movements.push(amount);
 
-        // Add loan date to movementsDates using toISOString method
-        currentAccount.movementsDates.push(new Date().toISOString());
+          // Add loan date to movementsDates using toISOString method
+          currentAccount.movementsDates.push(new Date().toISOString());
 
-        // Update UI
-        updateUI(currentAccount)
+          // Update UI
+          updateUI(currentAccount)
+        }, 3000);
+
 
       } else if (result.isDenied) {
         Swal.fire("Operation Canceled!", "", "info");
@@ -446,11 +568,15 @@ let sortedState = false;
 btnSort.addEventListener('click', function (e) {
   e.preventDefault();
   // Call the displayMovements function to display the account movements with the updated sorting state
-  console.log(currentAccount.movements);
-  displayMovements(currentAccount.movements, !sortedState);
+  // console.log(currentAccount.movements);
+  displayMovements(currentAccount, !sortedState);
   // Toggle the sorting state for the next click
   sortedState = !sortedState;
 })
+
+
+
+
 
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////

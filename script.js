@@ -247,20 +247,21 @@ const updateUI = function (acc) {
   calcDisplaySummary(acc)
 }
 
+
+
 // timer function
 const startLogOutTimer = function () {
-  // set time to 5 minutes
-  let time = 300;
-  console.log(time);
+
+
+
   // Call the timer every second
-  const timer = setInterval(() => {
+  const tick = function () {
     const min = String(Math.trunc(time / 60)).padStart(2, 0);
     const sec = String(time % 60);
+
     // In each call print the remaining time
     labelTimer.textContent = `${min}:${sec > 9 ? sec : '0' + sec}`
 
-    // Decrease 1s
-    time--;
 
     // when 0 seconds, stop timer and log out user
     if (time === 0) {
@@ -291,9 +292,18 @@ const startLogOutTimer = function () {
         }
       });
     }
+    // Decrease 1s
+    time--;
+  }
 
-  }, 1000)
-}
+  // set time to 2 minutes
+  let time = 120;
+
+  tick()
+  const timer = setInterval(tick, 1000)
+  return timer;
+};
+
 
 
 // Event Login handler UI
@@ -328,6 +338,7 @@ labelDate.textContent = new Intl.DateTimeFormat(locale, options).format(now)
 
 
 
+let timer;
 
 btnLogin.addEventListener('click', function (e) {
   e.preventDefault()
@@ -335,6 +346,8 @@ btnLogin.addEventListener('click', function (e) {
   // console.log(currentAccount);
 
   if (currentAccount?.pin === Number(inputLoginPin.value)) {
+
+
 
     inputLoginUsername.style = "display: none"
     inputLoginPin.style = "display: none"
@@ -350,13 +363,21 @@ btnLogin.addEventListener('click', function (e) {
     //start timer
     startLogOutTimer()
 
-    // Display UI
-    updateUI(currentAccount)
+
+
 
     // Clear input fields
     inputLoginUsername.value = inputLoginPin.value = ''
     // Input Field lose focus
     inputLoginPin.blur()
+
+    // Reset timer
+    if (timer) clearInterval(timer);
+    timer = startLogOutTimer()
+
+
+    // Update UI
+    updateUI(currentAccount)
 
   }
   else {
@@ -397,9 +418,18 @@ btnLogin.addEventListener('click', function (e) {
 //   labelWelcome.textContent = 'Log in to get started'
 
 // }
-const logOut = function (e) {
 
+
+
+
+const logOut = function (e) {
   e.preventDefault()
+
+  // Reset timer
+  if (timer) clearInterval(timer);
+  timer = startLogOutTimer()
+
+
   btnLogout.style.display = "none";
   btnLogin.style.display = "block";
   inputLoginUsername.style.display = "block";
@@ -408,7 +438,9 @@ const logOut = function (e) {
   containerApp.style.opacity = 0;
   labelWelcome.textContent = 'Log in to get started';
 };
-btnLogout.addEventListener('click', logOut)
+btnLogout.addEventListener('click', logOut);
+
+
 
 // Implementing Transfers
 btnTransfer.addEventListener('click', function (e) {
@@ -436,6 +468,10 @@ btnTransfer.addEventListener('click', function (e) {
 
     // Update UI
     updateUI(currentAccount)
+
+
+    //Reset timer
+    timer = startLogOutTimer()
   }
 })
 
@@ -485,6 +521,8 @@ btnLoan.addEventListener('click', function (e) {
       } else if (result.isDenied) {
         Swal.fire("Operation Canceled!", "", "info");
       }
+
+      timer = startLogOutTimer()
     });
 
 
